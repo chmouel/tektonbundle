@@ -6,9 +6,6 @@ Tekton Bundle as PipelineRun
 .. image:: https://img.shields.io/pypi/v/tektonbundle.svg
         :target: https://pypi.python.org/pypi/tektonbundle
 
-.. image:: https://img.shields.io/travis/chmouel/tektonbundle.svg
-        :target: https://travis-ci.com/chmouel/tektonbundle
-
 .. image:: https://readthedocs.org/projects/tektonbundle/badge/?version=latest
         :target: https://tektonbundle.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
