@@ -1,25 +1,31 @@
-"""Main module."""
 import copy
 import io
+import os
 import re
 from typing import Dict, List
 
 import yaml
+"""Main module."""
 
 TEKTON_TYPE = ("pipeline", "pipelinerun", "task", "taskrun", "condition")
 
 
-def tpl_apply(yaml_file, parameters):
+def tpl_apply(yaml_obj, parameters):
     def _apply(param):
         if param in parameters:
             return parameters[param]
         return "{{%s}}" % (param)
 
+    if os.path.exists(yaml_obj):
+        yamlstr = open(yaml_obj).read()
+    else:
+        yamlstr = yaml_obj
+
     return io.StringIO(
         re.sub(
             r"\{\{([_a-zA-Z0-9\.]*)\}\}",
             lambda m: _apply(m.group(1)),
-            open(yaml_file).read(),
+            yamlstr,
         ))
 
 
