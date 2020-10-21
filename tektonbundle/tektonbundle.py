@@ -16,16 +16,11 @@ def tpl_apply(yaml_obj, parameters):
             return parameters[param]
         return "{{%s}}" % (param)
 
-    if os.path.exists(yaml_obj):
-        yamlstr = open(yaml_obj).read()
-    else:
-        yamlstr = yaml_obj
-
     return io.StringIO(
         re.sub(
             r"\{\{([_a-zA-Z0-9\.]*)\}\}",
             lambda m: _apply(m.group(1)),
-            yamlstr,
+            open(yaml_obj).read(),
         ))
 
 
