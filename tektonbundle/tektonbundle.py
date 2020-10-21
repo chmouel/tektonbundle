@@ -1,10 +1,14 @@
+"""Main module."""
+
 import copy
 import io
+import logging
 import re
 from typing import Dict, List
 
 import yaml
-"""Main module."""
+
+log = logging.getLogger(__name__)
 
 TEKTON_TYPE = ("pipeline", "pipelinerun", "task", "taskrun", "condition")
 
@@ -36,7 +40,7 @@ def resolve_task(mpipe, name, yaml_documents):
     for task in tasks:
         if 'taskRef' in task:
             reftask = task['taskRef']['name']
-            if not 'task' in yaml_documents or reftask not in yaml_documents[
+            if 'task' not in yaml_documents or reftask not in yaml_documents[
                     'task']:
                 raise TektonBundleError(
                     f"Pipeline: {name} reference a Task: {reftask} not in repository"
@@ -60,9 +64,9 @@ def parse(yamlfiles: List[str], parameters: Dict[str, str]) -> str:
                 print("Skipping not a kubernetes file")
                 continue
 
-            name = document['metadata'][
-                'generateName'] if 'generateName' in document['metadata'].keys(
-                ) else document['metadata']['name']
+            name = (document['metadata']['generateName']
+                    if 'generateName' in document['metadata'].keys() else
+                    document['metadata']['name'])
             kind = document['kind'].lower()
 
             if kind not in TEKTON_TYPE:
@@ -90,7 +94,7 @@ def parse(yamlfiles: List[str], parameters: Dict[str, str]) -> str:
             mpr = resolve_task(mpr, pipeline_run, yaml_documents)
         elif 'pipelineRef' in mpr['spec']:
             refpipeline = mpr['spec']['pipelineRef']['name']
-            if not 'pipeline' in yaml_documents or refpipeline not in yaml_documents[
+            if 'pipeline' not in yaml_documents or refpipeline not in yaml_documents[
                     'pipeline']:
                 raise TektonBundleError(
                     f"PR: {pipeline_run} reference a Pipeline: {refpipeline} not in repository"
