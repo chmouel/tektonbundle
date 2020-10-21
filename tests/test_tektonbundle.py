@@ -16,12 +16,7 @@ def get_key(dico, key):
         if k.isdigit() and isinstance(curr, list):
             curr = curr[int(k)]
             continue
-        if k not in curr:
-            return ""
         curr = curr[k]
-
-    if not isinstance(curr, str):
-        curr = str(curr)
     return curr
 
 
