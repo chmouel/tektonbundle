@@ -2,15 +2,6 @@
 
 [![Codecov](https://img.shields.io/codecov/c/github/chmouel/tektonbundle/master.svg?style=flat-square)](https://codecov.io/gh/chmouel/tektonbundle)  [![License](https://img.shields.io/pypi/l/tektonbundle.svg?style=flat-square)](https://pypi.python.org/pypi/tektonbundle) [![PYPI](https://img.shields.io/pypi/v/tektonbundle.svg?style=flat-square)](https://pypi.python.org/pypi/tektonbundle)
 
-<!---
-.. image:: https://img.shields.io/pypi/v/tektonbundle.svg
-        :target: https://pypi.python.org/pypi/tektonbundle
-
-.. image:: https://readthedocs.org/projects/tektonbundle/badge/?version=latest
-        :target: https://tektonbundle.readthedocs.io/en/latest/?badge=latest
-        :alt: Documentation Status
--->
-
 A CLI to go over a bunch of Tekton yaml resources and bundle them as one in a `Pipelinerun` and `pipelineSpec`/`taskSpec`.
 It optionally can get argument to replace in tempalates.
 
