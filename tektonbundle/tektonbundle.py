@@ -57,7 +57,6 @@ def parse(yamlfiles: List[str], parameters: Dict[str, str]) -> str:
     yaml_documents = {}  # type: Dict[str, Dict]
     results = []
     for yaml_file in yamlfiles:
-
         for document in yaml.load_all(tpl_apply(yaml_file, parameters),
                                       Loader=yaml.Loader):
             if 'apiVersion' not in document or 'kind' not in document:
