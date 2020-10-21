@@ -61,7 +61,7 @@ PARAM_FIXTURES = [
 
 
 @pytest.fixture(scope="session")
-def fixtures():
+def testdata():
     ret = {}
     for fname in glob.glob(
             os.path.join(os.path.dirname(__file__), 'yamls/*.y*ml')):
@@ -70,7 +70,7 @@ def fixtures():
 
 
 @pytest.mark.parametrize("fixture,assertions,parametre", PARAM_FIXTURES)
-def test_tektonbundle_parsing(fixtures, fixture, assertions, parametre):
-    output = yaml.safe_load(tektonbundle.parse([fixtures[fixture]], parametre))
+def test_tektonbundle_parsing(testdata, fixture, assertions, parametre):
+    output = yaml.safe_load(tektonbundle.parse([testdata[fixture]], parametre))
     for assertment in assertions:
         assert get_key(output, assertment[0]) == assertment[1]
