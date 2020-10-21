@@ -5,6 +5,16 @@
 A CLI to go over a bunch of Tekton yaml resources and bundle them as one in a `Pipelinerun` and `pipelineSpec`/`taskSpec`.
 It optionally can get argument to replace in tempalates.
 
+## Install
+
+```shell
+pip3 install tektonbundle
+```
+
+and you are good to go!
+
+`pyyaml` is really the external depencences here.
+
 ## Usage
 
 You only need to point the tool to a directory and it will collect every `.yaml`
