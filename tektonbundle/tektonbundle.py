@@ -36,7 +36,7 @@ def parse(yamlfiles: List[str], parameters: Dict[str, str]) -> str:
                 print("Skipping not a kubernetes file")
                 continue
 
-            taskname = document['metadata'][
+            name = document['metadata'][
                 'generateName'] if 'generateName' in document['metadata'].keys(
                 ) else document['metadata']['name']
             kind = document['kind'].lower()
@@ -46,7 +46,7 @@ def parse(yamlfiles: List[str], parameters: Dict[str, str]) -> str:
                 continue
 
             yaml_documents.setdefault(kind, {})
-            yaml_documents[kind][taskname] = document
+            yaml_documents[kind][name] = document
 
     if 'pipelinerun' not in yaml_documents:
         raise Exception("We need at least a PipelineRun")
