@@ -59,7 +59,7 @@ def parse(yamlfiles: List[str], parameters: Dict[str, str]) -> str:
     for yaml_file in yamlfiles:
 
         for document in yaml.load_all(tpl_apply(yaml_file, parameters),
-                                      Loader=yaml.CLoader):
+                                      Loader=yaml.Loader):
             if 'apiVersion' not in document or 'kind' not in document:
                 log.debug("Skipping this document, not a kubernetes type")
                 continue
