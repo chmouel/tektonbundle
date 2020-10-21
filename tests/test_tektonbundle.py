@@ -34,6 +34,7 @@ def fixtures():
 
 
 def test_pipelinerun_pipeline_task(fixtures):
+    """A pipelinerun with a pipelineRef and taskRef"""
     output = yaml.safe_load(
         tektonbundle.parse([fixtures['pipelinerun-pipeline-task']],
                            {"value": "replaced_value"}))
@@ -49,6 +50,7 @@ def test_pipelinerun_pipeline_task(fixtures):
 
 
 def test_pipelinespec_taskspecs(fixtures):
+    """Pipelinespec and taskspec (so nothing)"""
     output = yaml.safe_load(
         tektonbundle.parse([fixtures['pipelinerun-pipelinespec-taskspec']],
                            {}))
@@ -57,7 +59,17 @@ def test_pipelinespec_taskspecs(fixtures):
         "spec.pipelineSpec.tasks.0.taskSpec.steps.0.name"), "hello-moto"
 
 
+def test_pipelinespec_tasksref(fixtures):
+    """Pipelinespec and a taskref"""
+    output = yaml.safe_load(
+        tektonbundle.parse([fixtures['pipelinerun-pipelinespec-taskref']], {}))
+    assert get_key(
+        output,
+        "spec.pipelineSpec.tasks.0.taskSpec.steps.0.name"), "hello-moto"
+
+
 def test_unknown_template_not_replacing(fixtures):
+    """Templating those {{}} if we don't have a value for it, output it as is"""
     output = yaml.safe_load(
         tektonbundle.parse([fixtures['pipelinerun-pipeline-task']],
                            {"nothing": "evergetreplaced"}))
