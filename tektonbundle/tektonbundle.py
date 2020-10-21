@@ -1,6 +1,5 @@
 import copy
 import io
-import os
 import re
 from typing import Dict, List
 
@@ -8,6 +7,10 @@ import yaml
 """Main module."""
 
 TEKTON_TYPE = ("pipeline", "pipelinerun", "task", "taskrun", "condition")
+
+
+class TektonBundleError(Exception):
+    pass
 
 
 def tpl_apply(yaml_obj, parameters):
@@ -33,8 +36,9 @@ def resolve_task(mpipe, name, yaml_documents):
     for task in tasks:
         if 'taskRef' in task:
             reftask = task['taskRef']['name']
-            if reftask not in yaml_documents['task']:
-                raise Exception(
+            if not 'task' in yaml_documents or reftask not in yaml_documents[
+                    'task']:
+                raise TektonBundleError(
                     f"Pipeline: {name} reference a Task: {reftask} not in repository"
                 )
 
@@ -69,7 +73,7 @@ def parse(yamlfiles: List[str], parameters: Dict[str, str]) -> str:
             yaml_documents[kind][name] = document
 
     if 'pipelinerun' not in yaml_documents:
-        raise Exception("We need at least a PipelineRun")
+        raise TektonBundleError("We need at least a PipelineRun")
 
     # if we have pipeline (i.e: not embedded) then expand all tasksRef insides.
     if 'pipeline' in yaml_documents:
@@ -84,11 +88,11 @@ def parse(yamlfiles: List[str], parameters: Dict[str, str]) -> str:
         mpr = copy.deepcopy(yaml_documents['pipelinerun'][pipeline_run])
         if 'pipelineSpec' in mpr['spec']:
             mpr = resolve_task(mpr, pipeline_run, yaml_documents)
-            # yaml_documents = resolve_task(mpipe, pipeline, yaml_documents)
         elif 'pipelineRef' in mpr['spec']:
             refpipeline = mpr['spec']['pipelineRef']['name']
-            if refpipeline not in yaml_documents['pipeline']:
-                raise Exception(
+            if not 'pipeline' in yaml_documents or refpipeline not in yaml_documents[
+                    'pipeline']:
+                raise TektonBundleError(
                     f"PR: {pipeline_run} reference a Pipeline: {refpipeline} not in repository"
                 )
             del mpr['spec']['pipelineRef']

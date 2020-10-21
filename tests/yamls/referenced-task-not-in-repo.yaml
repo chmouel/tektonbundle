@@ -19,11 +19,9 @@ spec:
     - name: repo_url
     - name: revision
   tasks:
-    - name: task-of-pipeline-test1
-      taskSpec:
-        steps:
-          - name: first-step
-            image: image1
+    - name: task-of-pipeline-test2
+      taskRef:
+        name: nothere
   steps:
     - name: first-step
       image: image

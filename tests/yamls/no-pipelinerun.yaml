@@ -1,16 +1,5 @@
 ---
 apiVersion: tekton.dev/v1beta1
-kind: PipelineRun
-metadata:
-  name: pr-test1
-spec:
-  pipelineRef:
-    name: pipeline-test1
-  params:
-    - name: key
-      value: "{{value}}"
----
-apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
   name: pipeline-test1
@@ -24,6 +13,19 @@ spec:
         steps:
           - name: first-step
             image: image1
+    - name: task-of-pipeline-test2
+      taskRef:
+        name: task-test2
   steps:
     - name: first-step
+      image: image
+
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: task-test2
+spec:
+  steps:
+    - name: second-step
       image: image

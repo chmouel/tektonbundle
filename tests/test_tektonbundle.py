@@ -24,7 +24,7 @@ def get_key(dico, key):
     return curr
 
 
-PARAM_FIXTURES = [
+FIXTURES_GOOD = [
     (
         "pipelinerun-pipeline-task",
         [("spec.pipelineSpec.tasks.0.taskSpec.steps.0.name", "first-step")],
@@ -59,6 +59,11 @@ PARAM_FIXTURES = [
     ),
 ]
 
+FIXTURES_BAD = [
+    "no-pipelinerun", "referenced-task-not-in-repo",
+    "referenced-pipeline-not-in-repo"
+]
+
 
 @pytest.fixture(scope="session")
 def testdata():
@@ -69,8 +74,14 @@ def testdata():
     return ret
 
 
-@pytest.mark.parametrize("fixture,assertions,parametre", PARAM_FIXTURES)
-def test_tektonbundle_parsing(testdata, fixture, assertions, parametre):
+@pytest.mark.parametrize("fixture,assertions,parametre", FIXTURES_GOOD)
+def test_good(testdata, fixture, assertions, parametre):
     output = yaml.safe_load(tektonbundle.parse([testdata[fixture]], parametre))
     for assertment in assertions:
         assert get_key(output, assertment[0]) == assertment[1]
+
+
+@pytest.mark.parametrize("fixture", FIXTURES_BAD)
+def test_bad(testdata, fixture):
+    with pytest.raises(tektonbundle.TektonBundleError):
+        yaml.safe_load(tektonbundle.parse([testdata[fixture]], {}))
