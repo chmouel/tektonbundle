@@ -51,23 +51,25 @@ def parse(yamlfiles: List[str], parameters: Dict[str, str]) -> str:
     if 'pipelinerun' not in yaml_documents:
         raise Exception("We need at least a PipelineRun")
 
-    # Expand all tasks in each tasks->taskRefs
-    for pipeline in yaml_documents['pipeline']:
-        mpipe = copy.deepcopy(yaml_documents['pipeline'][pipeline])
-        for task in mpipe['spec']['tasks']:
-            if 'taskRef' in task:
-                reftask = task['taskRef']['name']
-                if reftask not in yaml_documents['task']:
-                    raise Exception(
-                        f"Pipeline: {pipeline} reference a Task: {reftask} not in repository"
-                    )
+    # if we have pipeline (i.e: not embedded) then expand all tasksRef insides.
+    if 'pipeline' in yaml_documents:
+        for pipeline in yaml_documents['pipeline']:
+            mpipe = copy.deepcopy(yaml_documents['pipeline'][pipeline])
+            for task in mpipe['spec']['tasks']:
+                if 'taskRef' in task:
+                    reftask = task['taskRef']['name']
+                    if reftask not in yaml_documents['task']:
+                        raise Exception(
+                            f"Pipeline: {pipeline} reference a Task: {reftask} not in repository"
+                        )
 
-                del task['taskRef']
-                task['taskSpec'] = yaml_documents['task'][reftask]['spec']
+                    del task['taskRef']
+                    task['taskSpec'] = yaml_documents['task'][reftask]['spec']
 
-        yaml_documents['pipeline'][pipeline] = copy.deepcopy(mpipe)
+            yaml_documents['pipeline'][pipeline] = copy.deepcopy(mpipe)
 
-    # Expand pipeline in pipelineRef
+    # For all pipelinerun expands the pipelineRef, keep it as is if it's a
+    # pipelineSpec.
     for pipeline_run in yaml_documents['pipelinerun']:
         mpr = copy.deepcopy(yaml_documents['pipelinerun'][pipeline_run])
         if 'pipelineRef' in mpr['spec']:
@@ -81,6 +83,7 @@ def parse(yamlfiles: List[str], parameters: Dict[str, str]) -> str:
                 refpipeline]['spec']
 
         # Adjust names with generateName if needed
+        # TODO(chmou): make it optional, we maybe don't want to do this sometime
         if 'name' in mpr['metadata']:
             name = mpr['metadata']['name']
             mpr['metadata']['generateName'] = name + "-"

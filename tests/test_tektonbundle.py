@@ -48,6 +48,15 @@ def test_pipelinerun_pipeline_task(fixtures):
     assert get_key(output, "spec.params.0.value"), "replaced_value"
 
 
+def test_pipelinespec_taskspecs(fixtures):
+    output = yaml.safe_load(
+        tektonbundle.parse([fixtures['pipelinerun-pipelinespec-taskspec']],
+                           {}))
+    assert get_key(
+        output,
+        "spec.pipelineSpec.tasks.0.taskSpec.steps.0.name"), "hello-moto"
+
+
 def test_unknown_template_not_replacing(fixtures):
     output = yaml.safe_load(
         tektonbundle.parse([fixtures['pipelinerun-pipeline-task']],
