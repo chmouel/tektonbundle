@@ -5,7 +5,17 @@
 A CLI to go over a bunch of Tekton yaml resources and bundle them as one in a `Pipelinerun` and `pipelineSpec`/`taskSpec`.
 It optionally can get argument to replace in tempalates.
 
-## USAGE
+## Usage
+
+You only need to point the tool to a directory and it will collect every `.yaml`
+or `.yml` in there and analyze them. It will then output the 'bundled' yaml file which you can pipe to
+`kubectl create`, i.e:
+
+```shell
+tektonbundle "/path/to/directory"|kubectl create -f-
+```
+
+Full help of the CLI is :
 
 ```
 usage: tektonbundle [-h] directory [parameters [parameters ...]]
@@ -18,7 +28,7 @@ optional arguments:
   -h, --help  show this help message and exit
 ```
 
-## USAGE
+## Description
 
 If you have a Pipelinerun that looks like this :
 
@@ -81,14 +91,18 @@ spec:
 
 It will change the `name` as `generateName` to be unique.
 
-## USAGE
+## Substition support via parameters.
 
-You only need to point the tool to a directory and it will collect every `.yaml`
-or `.yml` in there and analyze them. It will then output the 'bundled' yaml file which you can pipe to
-`kubectl create`, i.e:
+`tektonbundle` support simple template substitions if you need to specify some value before applying.
+
+If you have the string `key: {{value}}` in your template (no spaces in between).
+
+And you launch the CLI with this arguments :
 
 ```shell
-tektonbundle "/path/to/directory"|kubectl create -f-
+tektonbundle /path/to/dir value="hello"
 ```
 
-* Free software: MIT license
+The value of the template would be substited with the value your provided.
+
+If no value has been provided, it will be kept as is (you will end up with a `key: {{value}}` in your template).
