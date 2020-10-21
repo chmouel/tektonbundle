@@ -61,7 +61,7 @@ def parse(yamlfiles: List[str], parameters: Dict[str, str]) -> str:
         for document in yaml.load_all(tpl_apply(yaml_file, parameters),
                                       Loader=yaml.CLoader):
             if 'apiVersion' not in document or 'kind' not in document:
-                print("Skipping not a kubernetes file")
+                log.debug("Skipping this document, not a kubernetes type")
                 continue
 
             name = (document['metadata']['generateName']
@@ -70,7 +70,7 @@ def parse(yamlfiles: List[str], parameters: Dict[str, str]) -> str:
             kind = document['kind'].lower()
 
             if kind not in TEKTON_TYPE:
-                print(f"Skipping not a tekton file: kind={kind}")
+                log.debug("Skipping not a tekton file: kind=%s", kind)
                 continue
 
             yaml_documents.setdefault(kind, {})

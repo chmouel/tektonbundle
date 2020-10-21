@@ -1,12 +1,13 @@
 #!/usr/bin/env python
-"""Tests for `tektonbundle` package."""
 import glob
+import logging
 import os
 
 import pytest
 import yaml
 
 from tektonbundle import tektonbundle
+"""Tests for `tektonbundle` package."""
 
 
 def get_key(dico, key):
@@ -64,6 +65,11 @@ FIXTURES_BAD = [
     "referenced-pipeline-not-in-repo"
 ]
 
+FIXTURES_UGLY = [
+    ("not-a-kubernetes-yaml", "Skipping this document, not a kubernetes type"),
+    ("not-a-tekton-document", "Skipping not a tekton file: kind=pod")
+]
+
 
 @pytest.fixture(scope="session")
 def testdata():
@@ -84,4 +90,11 @@ def test_good(testdata, fixture, assertions, parametre):
 @pytest.mark.parametrize("fixture", FIXTURES_BAD)
 def test_bad(testdata, fixture):
     with pytest.raises(tektonbundle.TektonBundleError):
-        yaml.safe_load(tektonbundle.parse([testdata[fixture]], {}))
+        tektonbundle.parse([testdata[fixture]], {})
+
+
+@pytest.mark.parametrize("fixture,logtext", FIXTURES_UGLY)
+def test_warnings(testdata, caplog, fixture, logtext):
+    with caplog.at_level(logging.DEBUG):
+        tektonbundle.parse([testdata[fixture]], {})
+        assert logtext in caplog.text
