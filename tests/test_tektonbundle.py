@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+"""Tests for `tektonbundle` package."""
 import glob
 import logging
 import os
@@ -7,7 +8,6 @@ import pytest
 import yaml
 
 from tektonbundle import tektonbundle
-"""Tests for `tektonbundle` package."""
 
 
 def get_key(dico, key):
