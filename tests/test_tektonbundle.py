@@ -24,6 +24,42 @@ def get_key(dico, key):
     return curr
 
 
+PARAM_FIXTURES = [
+    (
+        "pipelinerun-pipeline-task",
+        [("spec.pipelineSpec.tasks.0.taskSpec.steps.0.name", "first-step")],
+        {},
+    ),
+    (
+        "pipelinerun-pipeline-task",
+        [("spec.params.0.value", "thatizzevalue")],
+        {
+            "value": "thatizzevalue"
+        },
+    ),
+    (
+        "pipelinerun-pipeline-task",
+        [("spec.params.0.value", "{{value}}")],
+        {},
+    ),
+    (
+        "pipelinerun-pipelinespec-taskspec",
+        [("spec.pipelineSpec.tasks.0.taskSpec.steps.0.name", "hello-moto")],
+        {},
+    ),
+    (
+        "pipelinerun-pipelinespec-taskref",
+        [("spec.pipelineSpec.tasks.0.taskSpec.steps.0.name", "task1")],
+        {},
+    ),
+    (
+        "pipelinerun-pipelineref-taskspec",
+        [("spec.pipelineSpec.tasks.0.taskSpec.steps.0.name", "first-step")],
+        {},
+    ),
+]
+
+
 @pytest.fixture(scope="session")
 def fixtures():
     ret = {}
@@ -33,48 +69,8 @@ def fixtures():
     return ret
 
 
-def test_pipelinerun_pipeline_task(fixtures):
-    """A pipelinerun with a pipelineRef and taskRef"""
-    output = yaml.safe_load(
-        tektonbundle.parse([fixtures['pipelinerun-pipeline-task']],
-                           {"value": "replaced_value"}))
-    assert get_key(
-        output,
-        "spec.pipelineSpec.tasks.0.taskSpec.steps.0.name"), "first-steps"
-
-    assert get_key(output, "spec.params.0.value"), "replaced_value"
-
-
-def test_pipelinespec_taskspecs(fixtures):
-    """Pipelinespec and taskspec (so nothing)"""
-    output = yaml.safe_load(
-        tektonbundle.parse([fixtures['pipelinerun-pipelinespec-taskspec']],
-                           {}))
-    assert get_key(
-        output,
-        "spec.pipelineSpec.tasks.0.taskSpec.steps.0.name"), "hello-moto"
-
-
-def test_pipelinespec_tasksref(fixtures):
-    """Pipelinespec and a taskref"""
-    output = yaml.safe_load(
-        tektonbundle.parse([fixtures['pipelinerun-pipelinespec-taskref']], {}))
-    assert get_key(
-        output,
-        "spec.pipelineSpec.tasks.0.taskSpec.steps.0.name"), "hello-moto"
-
-
-def test_pipelineref_taskspec(fixtures):
-    output = yaml.safe_load(
-        tektonbundle.parse([fixtures['pipelinerun-pipelineref-taskspec']], {}))
-    assert get_key(
-        output,
-        "spec.pipelineSpec.tasks.0.taskSpec.steps.0.name"), "second-step"
-
-
-def test_unknown_template_not_replacing(fixtures):
-    """Templating those {{}} if we don't have a value for it, output it as is"""
-    output = yaml.safe_load(
-        tektonbundle.parse([fixtures['pipelinerun-pipeline-task']],
-                           {"nothing": "evergetreplaced"}))
-    assert get_key(output, "spec.params.0.value"), "{{value}}"
+@pytest.mark.parametrize("fixture,assertions,parametre", PARAM_FIXTURES)
+def test_tektonbundle_parsing(fixtures, fixture, assertions, parametre):
+    output = yaml.safe_load(tektonbundle.parse([fixtures[fixture]], parametre))
+    for assertment in assertions:
+        assert get_key(output, assertment[0]) == assertment[1]
