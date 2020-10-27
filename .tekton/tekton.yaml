@@ -1,0 +1,12 @@
+secrets:
+  - chmouel-tektonbundle-codecov
+
+tasks:
+  - git-clone
+  - yaml-lint
+  - pylint
+  - pytest
+  - https://github.com/chmouel/catalog/raw/add-codecov-task/task/codecov/0.1/codecov.yaml
+
+files:
+  - run.yaml
