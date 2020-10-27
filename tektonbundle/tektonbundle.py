@@ -31,7 +31,7 @@ def tpl_apply(yaml_obj, parameters):
         ))
 
 
-def resolve_task(mpipe, name, yaml_documents):
+def resolve_task(mpipe, name, yaml_documents, skip_task_inlining):
     if 'pipelineSpec' in mpipe['spec']:
         tasks = mpipe['spec']['pipelineSpec']['tasks']
     else:
@@ -40,6 +40,9 @@ def resolve_task(mpipe, name, yaml_documents):
     for task in tasks:
         if 'taskRef' in task:
             reftask = task['taskRef']['name']
+            if reftask in skip_task_inlining:
+                continue
+
             if 'task' not in yaml_documents or reftask not in yaml_documents[
                     'task']:
                 raise TektonBundleError(
@@ -52,7 +55,8 @@ def resolve_task(mpipe, name, yaml_documents):
     return mpipe
 
 
-def parse(yamlfiles: List[str], parameters: Dict[str, str]) -> str:
+def parse(yamlfiles: List[str], parameters: Dict[str, str],
+          skip_inlining: List[str]) -> str:
     """parse a bunch of yaml files"""
     yaml_documents = {}  # type: Dict[str, Dict]
     results = []
@@ -82,7 +86,8 @@ def parse(yamlfiles: List[str], parameters: Dict[str, str]) -> str:
     if 'pipeline' in yaml_documents:
         for pipeline in yaml_documents['pipeline']:
             mpipe = copy.deepcopy(yaml_documents['pipeline'][pipeline])
-            resolved = resolve_task(mpipe, pipeline, yaml_documents)
+            resolved = resolve_task(mpipe, pipeline, yaml_documents,
+                                    skip_inlining)
             yaml_documents['pipeline'][pipeline] = copy.deepcopy(resolved)
 
     # For all pipelinerun expands the pipelineRef, keep it as is if it's a
@@ -90,7 +95,8 @@ def parse(yamlfiles: List[str], parameters: Dict[str, str]) -> str:
     for pipeline_run in yaml_documents['pipelinerun']:
         mpr = copy.deepcopy(yaml_documents['pipelinerun'][pipeline_run])
         if 'pipelineSpec' in mpr['spec']:
-            mpr = resolve_task(mpr, pipeline_run, yaml_documents)
+            mpr = resolve_task(mpr, pipeline_run, yaml_documents,
+                               skip_inlining)
         elif 'pipelineRef' in mpr['spec']:
             refpipeline = mpr['spec']['pipelineRef']['name']
             if 'pipeline' not in yaml_documents or refpipeline not in yaml_documents[

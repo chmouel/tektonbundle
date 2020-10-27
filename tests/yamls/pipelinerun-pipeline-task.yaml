@@ -27,6 +27,9 @@ spec:
     - name: task-of-pipeline-test2
       taskRef:
         name: task-test2
+    - name: task-of-pipeline-test3
+      taskRef:
+        name: task-test3
   steps:
     - name: first-step
       image: image
@@ -35,6 +38,15 @@ apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
   name: task-test2
+spec:
+  steps:
+    - name: second-step
+      image: image
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: task-test3
 spec:
   steps:
     - name: second-step

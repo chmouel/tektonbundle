@@ -28,14 +28,16 @@ tektonbundle "/path/to/directory"|kubectl create -f-
 Full help of the CLI is :
 
 ```
-usage: tektonbundle [-h] directory [parameters [parameters ...]]
+usage: tektonbundle [-h] [--skip-inlining SKIP_INLINING] directory [parameters [parameters ...]]
 
 positional arguments:
-  directory   Directory where to get all the yaml files.
-  parameters  Add parameters to pass to templates.
+  directory             Directory where to get all the yaml files.
+  parameters            Add parameters to pass to templates.
 
 optional arguments:
-  -h, --help  show this help message and exit
+  -h, --help            show this help message and exit
+  --skip-inlining SKIP_INLINING
+                        Skip inlining these tasks, you can add many of them separated by a comma.
 ```
 
 ## Description
@@ -101,6 +103,11 @@ spec:
 
 It will change the `name` as `generateName` to be unique.
 
+You can skip some tasks to be inlined and be kept as referenced, you only have
+to specify the switch `--skip-inlining` with the name of the task to be
+skipped. You can add multiple of them separated by comma, i.e:
+`--skip-inlining=task1,task2`
+
 ## Substition support via parameters.
 
 `tektonbundle` support simple template substitions if you need to specify some value before applying.
@@ -113,6 +120,6 @@ And you launch the CLI with this arguments :
 tektonbundle /path/to/dir value="hello"
 ```
 
-The value of the template would be substited with the value your provided.
+The value of the template would be substited with the value you have provided.
 
 If no value has been provided, it will be kept as is (you will end up with a `key: {{value}}` in your template).

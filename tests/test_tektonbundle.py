@@ -77,7 +77,8 @@ def testdata():
 
 @pytest.mark.parametrize("fixture,assertions,parametre", FIXTURES_GOOD)
 def test_good(testdata, fixture, assertions, parametre):
-    output = yaml.safe_load(tektonbundle.parse([testdata[fixture]], parametre))
+    output = yaml.safe_load(
+        tektonbundle.parse([testdata[fixture]], parametre, skip_inlining=[]))
     for assertment in assertions:
         assert get_key(output, assertment[0]) == assertment[1]
 
@@ -85,11 +86,23 @@ def test_good(testdata, fixture, assertions, parametre):
 @pytest.mark.parametrize("fixture", FIXTURES_BAD)
 def test_bad(testdata, fixture):
     with pytest.raises(tektonbundle.TektonBundleError):
-        tektonbundle.parse([testdata[fixture]], {})
+        tektonbundle.parse([testdata[fixture]], {}, skip_inlining=[])
 
 
 @pytest.mark.parametrize("fixture,logtext", FIXTURES_UGLY)
 def test_warnings(testdata, caplog, fixture, logtext):
     with caplog.at_level(logging.DEBUG):
-        tektonbundle.parse([testdata[fixture]], {})
+        tektonbundle.parse([testdata[fixture]], {}, skip_inlining=[])
         assert logtext in caplog.text
+
+
+def test_skip_inlining(testdata):
+    print(testdata["pipelinerun-pipeline-task"])
+    inliningSkipped = False
+    output = yaml.safe_load(
+        tektonbundle.parse([testdata["pipelinerun-pipeline-task"]], {},
+                           skip_inlining=["task-test3"]))
+    for task in output['spec']['pipelineSpec']['tasks']:
+        if 'taskRef' in task and task['taskRef']['name'] == "task-test3":
+            inliningSkipped = True
+    assert (inliningSkipped)
