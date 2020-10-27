@@ -98,11 +98,11 @@ def test_warnings(testdata, caplog, fixture, logtext):
 
 def test_skip_inlining(testdata):
     print(testdata["pipelinerun-pipeline-task"])
-    inliningSkipped = False
+    inlining_skipped = False
     output = yaml.safe_load(
         tektonbundle.parse([testdata["pipelinerun-pipeline-task"]], {},
                            skip_inlining=["task-test3"]))
     for task in output['spec']['pipelineSpec']['tasks']:
         if 'taskRef' in task and task['taskRef']['name'] == "task-test3":
-            inliningSkipped = True
-    assert (inliningSkipped)
+            inlining_skipped = True
+    assert inlining_skipped
