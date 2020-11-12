@@ -1,12 +1,10 @@
 #!/usr/bin/env python
 """Tests for `tektonbundle` package."""
-import glob
-import os
-
 import pytest
 import yaml
 
 from tektonbundle import tektonbundle
+from tests.fixtures import testdata  # pylint:  disable=unused-import
 
 
 def get_key(dico, key):
@@ -58,15 +56,6 @@ FIXTURES_BAD = [
     "no-pipelinerun", "referenced-task-not-in-repo",
     "referenced-pipeline-not-in-repo"
 ]
-
-
-@pytest.fixture(scope="session")
-def testdata():
-    ret = {}
-    for fname in glob.glob(
-            os.path.join(os.path.dirname(__file__), 'yamls/*.y*ml')):
-        ret[os.path.splitext(os.path.basename(fname))[0]] = fname
-    return ret
 
 
 @pytest.mark.parametrize("fixture,assertions,parametre", FIXTURES_GOOD)
