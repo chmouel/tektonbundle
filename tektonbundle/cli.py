@@ -20,10 +20,13 @@ def main():
     parser.add_argument('--skip-inlining',
                         help="Skip inlining these tasks, you can add many of "
                         "them separated by a comma.")
-    parser.add_argument("--print-skipped",
-                        default=False,
-                        action="store_true",
-                        help="Print non tekton files too.")
+    parser.add_argument(
+        "--only-bundled",
+        default=False,
+        action="store_true",
+        help=
+        "Print only the files that have been bundled (tekton files) and skip others."
+    )
     args = parser.parse_args()
 
     yaml_files = []
@@ -41,7 +44,7 @@ def main():
                              skip_inlining=skip_inlining)
     print("--- ")
     print(ret['bundle'])
-    if args.print_skipped:
+    if not args.only_bundled:
         print("--- ")
         print("\n--- \n".join(ret['ignored_not_tekton'] +
                               ret['ignored_not_k8']))

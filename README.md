@@ -28,7 +28,7 @@ tektonbundle "/path/to/directory"|kubectl create -f-
 Full help of the CLI is :
 
 ```
-usage: tektonbundle [-h] [--skip-inlining SKIP_INLINING] [--print-skipped]
+usage: tektonbundle [-h] [--skip-inlining SKIP_INLINING] [--only-bundled]
                     files [files ...] [parameters [parameters ...]]
 
 positional arguments:
@@ -39,7 +39,7 @@ optional arguments:
   -h, --help            show this help message and exit
   --skip-inlining SKIP_INLINING
                         Skip inlining these tasks, you can add many of them separated by a comma.
-  --print-skipped       Print non tekton files too.
+  --only-bundled        Print only the files that have been bundled (tekton files) and skip others.
 ```
 
 ## Description
@@ -109,6 +109,11 @@ You can skip some tasks to be inlined and be kept as referenced, you only have
 to specify the switch `--skip-inlining` with the name of the task to be
 skipped. You can add multiple of them separated by comma, i.e:
 `--skip-inlining=task1,task2`
+
+By default `tektonbundle` will print every yaml files from the directory or
+files you have given even those that are not bundled (i.e: non tekton files). If
+you don't want this behavior you can add the option `--only-bundled` and it will
+only print the 'bundle' file.
 
 ## Substition support via parameters.
 
