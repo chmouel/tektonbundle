@@ -17,9 +17,9 @@ and you are good to go!
 
 ## Usage
 
-You only need to point the tool to a directory and it will collect every `.yaml`
-or `.yml` in there and analyze them. It will then output the 'bundled' yaml file which you can pipe to
-`kubectl create`, i.e:
+You only need to point the tool to some yaml files or a directory where it will
+collect every `.yaml` or `.yml` files in there and analyze them. It will then
+output the 'bundled' yaml file which you can pipe to `kubectl create`, i.e:
 
 ```shell
 tektonbundle "/path/to/directory"|kubectl create -f-
@@ -28,16 +28,18 @@ tektonbundle "/path/to/directory"|kubectl create -f-
 Full help of the CLI is :
 
 ```
-usage: tektonbundle [-h] [--skip-inlining SKIP_INLINING] directory [parameters [parameters ...]]
+usage: tektonbundle [-h] [--skip-inlining SKIP_INLINING] [--print-skipped]
+                    files [files ...] [parameters [parameters ...]]
 
 positional arguments:
-  directory             Directory where to get all the yaml files.
+  files                 Files and/or directories where to get all the yaml files.
   parameters            Add parameters to pass to templates.
 
 optional arguments:
   -h, --help            show this help message and exit
   --skip-inlining SKIP_INLINING
                         Skip inlining these tasks, you can add many of them separated by a comma.
+  --print-skipped       Print non tekton files too.
 ```
 
 ## Description

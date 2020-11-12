@@ -10,8 +10,10 @@ from tektonbundle import tektonbundle
 def main():
     """Console script for tektonbundle."""
     parser = argparse.ArgumentParser()
-    parser.add_argument('directory',
-                        help="Directory where to get all the yaml files.")
+    parser.add_argument(
+        'files',
+        nargs='+',
+        help="Files and/or directories where to get all the yaml files.")
     parser.add_argument('parameters',
                         nargs='*',
                         help="Add parameters to pass to templates.")
@@ -24,9 +26,14 @@ def main():
                         help="Print non tekton files too.")
     args = parser.parse_args()
 
-    if not os.path.isdir(args.directory):
-        raise Exception(f"{args.directory} should have been a directory")
-    yaml_files = glob.glob(os.path.join(args.directory, "*.y*ml"))
+    yaml_files = []
+    for file_or_dir in args.files:
+        if os.path.isdir(file_or_dir):
+            yaml_files = yaml_files + glob.glob(
+                os.path.join(file_or_dir, "*.y*ml"))
+        else:
+            yaml_files.append(file_or_dir)
+
     parameters = {i.split("=")[0]: i.split("=")[1] for i in args.parameters}
     skip_inlining = args.skip_inlining.split(",") if args.skip_inlining else []
     ret = tektonbundle.parse(yaml_files,
