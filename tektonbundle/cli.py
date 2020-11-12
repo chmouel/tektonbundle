@@ -7,13 +7,14 @@ import sys
 from tektonbundle import tektonbundle
 
 
-def main():
+def bundler(arguments):
     """Console script for tektonbundle."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
         'files',
         nargs='+',
         help="Files and/or directories where to get all the yaml files.")
+
     parser.add_argument('parameters',
                         nargs='*',
                         help="Add parameters to pass to templates.")
@@ -27,7 +28,7 @@ def main():
         help=
         "Print only the files that have been bundled (tekton files) and skip others."
     )
-    args = parser.parse_args()
+    args = parser.parse_args(arguments)
 
     yaml_files = []
     for file_or_dir in args.files:
@@ -39,16 +40,21 @@ def main():
 
     parameters = {i.split("=")[0]: i.split("=")[1] for i in args.parameters}
     skip_inlining = args.skip_inlining.split(",") if args.skip_inlining else []
-    ret = tektonbundle.parse(yaml_files,
-                             parameters=parameters,
-                             skip_inlining=skip_inlining)
-    print("--- ")
-    print(ret['bundle'])
+    parsed = tektonbundle.parse(yaml_files,
+                                parameters=parameters,
+                                skip_inlining=skip_inlining)
+    ret = ["--- "]
+    ret.append(parsed['bundle'])
     if not args.only_bundled:
-        print("--- ")
-        print("\n--- \n".join(ret['ignored_not_tekton'] +
-                              ret['ignored_not_k8']))
+        ret.append("--- ")
+        ret.append("\n--- \n".join(parsed['ignored_not_tekton'] +
+                                   parsed['ignored_not_k8']))
+    return ret
+
+
+def main():
+    print("\n".join(bundler(sys.argv[1:])))
 
 
 if __name__ == "__main__":
-    sys.exit(main())  # pragma: no cover
+    sys.exit(main())  # pragma: no-cover
