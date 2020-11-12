@@ -56,15 +56,23 @@ def resolve_task(mpipe, name, yaml_documents, skip_task_inlining):
 
 
 def parse(yamlfiles: List[str], parameters: Dict[str, str],
-          skip_inlining: List[str]) -> str:
+          skip_inlining: List[str]) -> Dict[str, str]:
     """parse a bunch of yaml files"""
     yaml_documents = {}  # type: Dict[str, Dict]
     results = []
+    notkube_ignored = []
+    nottekton_ignored = []
+
     for yaml_file in yamlfiles:
         for document in yaml.load_all(tpl_apply(yaml_file, parameters),
                                       Loader=yaml.Loader):
             if 'apiVersion' not in document or 'kind' not in document:
-                log.debug("Skipping this document, not a kubernetes type")
+                notkube_ignored.append(
+                    yaml.dump(
+                        document,
+                        Dumper=yaml.Dumper,
+                    ))
+
                 continue
 
             name = (document['metadata']['generateName']
@@ -73,7 +81,11 @@ def parse(yamlfiles: List[str], parameters: Dict[str, str],
             kind = document['kind'].lower()
 
             if kind not in TEKTON_TYPE:
-                log.debug("Skipping not a tekton file: kind=%s", kind)
+                nottekton_ignored.append(
+                    yaml.dump(
+                        document,
+                        Dumper=yaml.Dumper,
+                    ))
                 continue
 
             yaml_documents.setdefault(kind, {})
@@ -117,7 +129,15 @@ def parse(yamlfiles: List[str], parameters: Dict[str, str],
 
         results.append(mpr)
 
-    return (yaml.dump_all(results,
-                          Dumper=yaml.Dumper,
-                          default_flow_style=False,
-                          allow_unicode=True))
+    ret = {
+        'bundle':
+        yaml.dump_all(results,
+                      Dumper=yaml.Dumper,
+                      default_flow_style=False,
+                      allow_unicode=True),
+        'ignored_not_tekton':
+        nottekton_ignored,
+        'ignored_not_k8':
+        notkube_ignored
+    }
+    return ret

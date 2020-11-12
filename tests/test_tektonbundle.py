@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 """Tests for `tektonbundle` package."""
 import glob
-import logging
 import os
 
 import pytest
@@ -60,11 +59,6 @@ FIXTURES_BAD = [
     "referenced-pipeline-not-in-repo"
 ]
 
-FIXTURES_UGLY = [
-    ("not-a-kubernetes-yaml", "Skipping this document, not a kubernetes type"),
-    ("not-a-tekton-document", "Skipping not a tekton file: kind=pod")
-]
-
 
 @pytest.fixture(scope="session")
 def testdata():
@@ -77,8 +71,8 @@ def testdata():
 
 @pytest.mark.parametrize("fixture,assertions,parametre", FIXTURES_GOOD)
 def test_good(testdata, fixture, assertions, parametre):
-    output = yaml.safe_load(
-        tektonbundle.parse([testdata[fixture]], parametre, skip_inlining=[]))
+    ret = tektonbundle.parse([testdata[fixture]], parametre, skip_inlining=[])
+    output = yaml.safe_load(ret['bundle'])
     for assertment in assertions:
         assert get_key(output, assertment[0]) == assertment[1]
 
@@ -89,19 +83,22 @@ def test_bad(testdata, fixture):
         tektonbundle.parse([testdata[fixture]], {}, skip_inlining=[])
 
 
-@pytest.mark.parametrize("fixture,logtext", FIXTURES_UGLY)
-def test_warnings(testdata, caplog, fixture, logtext):
-    with caplog.at_level(logging.DEBUG):
-        tektonbundle.parse([testdata[fixture]], {}, skip_inlining=[])
-        assert logtext in caplog.text
+def test_skip_not_tekton_documents(testdata):
+    ret = tektonbundle.parse([testdata["not-a-kubernetes-yaml"]], {},
+                             skip_inlining=[])
+    assert ret['ignored_not_k8']
+
+    ret = tektonbundle.parse([testdata["not-a-tekton-document"]], {},
+                             skip_inlining=[])
+
+    assert ret['ignored_not_tekton']
 
 
 def test_skip_inlining(testdata):
-    print(testdata["pipelinerun-pipeline-task"])
     inlining_skipped = False
-    output = yaml.safe_load(
-        tektonbundle.parse([testdata["pipelinerun-pipeline-task"]], {},
-                           skip_inlining=["task-test3"]))
+    ret = tektonbundle.parse([testdata["pipelinerun-pipeline-task"]], {},
+                             skip_inlining=["task-test3"])
+    output = yaml.safe_load(ret['bundle'])
     for task in output['spec']['pipelineSpec']['tasks']:
         if 'taskRef' in task and task['taskRef']['name'] == "task-test3":
             inlining_skipped = True
